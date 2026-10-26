@@ -4393,6 +4393,10 @@ void TuneDown() {
       } else if (frequency_AM < MWLowEdgeSet) {
         temp = FREQ_MW_STEP_9K;
         frequency_AM = (frequency_AM / FREQ_MW_STEP_9K) * FREQ_MW_STEP_9K;
+#ifdef HAS_AIR_BAND
+      } else if (band == BAND_AIR) {
+        temp = (airstepsize == 0) ? FREQ_AIR_STEP_25K : 8;
+#endif
       } else {
         temp = FREQ_SW_STEP_5K;
         frequency_AM = (frequency_AM / FREQ_SW_STEP_5K) * FREQ_SW_STEP_5K;
