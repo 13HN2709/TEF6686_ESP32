@@ -651,6 +651,10 @@ void setup() {
   MWHighEdgeSet = mwstepsize == false ? FREQ_MW_HIGH_EDGE_MAX_9K : FREQ_MW_HIGH_EDGE_MAX_10K;
   SWLowEdgeSet = FREQ_SW_LOW_EDGE_MIN;
   SWHighEdgeSet = FREQ_SW_HIGH_EDGE_MAX;
+#ifdef HAS_AIR_BAND
+  AIRLowEdgeSet = FREQ_AIR_LOW_EDGE_MIN;
+  AIRHighEdgeSet = FREQ_AIR_HIGH_EDGE_MIN;
+#endif
   LowEdgeOIRTSet = FREQ_FM_OIRT_START;
   HighEdgeOIRTSet = FREQ_FM_OIRT_END;
 
@@ -2023,6 +2027,15 @@ void LimitAMFrequency() {//todo air
         frequency_AM = SWLowEdgeSet;
       }
       break;
+#ifdef HAS_AIR_BAND
+    case BAND_AIR:
+      frequency_AM = frequency_AIR;
+      if (frequency_AM > AIRHighEdgeSet || frequency_AM < AIRLowEdgeSet) {
+        frequency_AM = AIRLowEdgeSet;
+      }
+      frequency_AIR = frequency_AM;
+      break;
+#endif
   }
 }
 
@@ -2393,7 +2406,7 @@ void SelectBand() {
     if (!externaltune && tunemode != TUNE_MEM) CheckBandForbiddenAM();
 #ifdef HAS_AIR_BAND
     if (band == BAND_AIR) {
-      radio.SetFreqAIR(10700);
+      radio.SetFreqAIR(frequency_AIR / 10);
     } else {
       radio.SetFreqAM(frequency_AM);
     }
@@ -3124,8 +3137,7 @@ void DoMemoryPosTune() {
 #ifdef HAS_AIR_BAND
     case BAND_AIR:
       frequency_AIR = presets[memorypos].frequency;
-      // radio.SetFreq(frequency_AIR); // todo
-      radio.SetFreqAM(10700); // todo
+      radio.SetFreqAIR(frequency_AIR / 10);
       break;
 #endif
   }
@@ -4351,12 +4363,12 @@ void TuneUp() {
 #ifdef HAS_AIR_BAND
   else if (band == BAND_AIR) {
     frequency_AM += temp;
-    if (frequency_AIR > AIRHighEdgeSet) {
+    if (frequency_AM > AIRHighEdgeSet) {
       frequency_AM = AIRLowEdgeSet;
       if (edgebeep) EdgeBeeper();
     }
-    radio.SetFreqAM(frequency_AM);
     frequency_AIR = frequency_AM;
+    radio.SetFreqAIR(frequency_AIR / 10);
   }
 #endif
   radio.clearRDS(fullsearchrds);
@@ -4446,6 +4458,16 @@ void TuneDown() {
     }
     radio.SetFreqAM(frequency_AM);
     frequency_SW = frequency_AM;
+#ifdef HAS_AIR_BAND
+  } else if (band == BAND_AIR) {
+    frequency_AM = (frequency_AM > temp) ? frequency_AM - temp : AIRLowEdgeSet;
+    if (frequency_AM < AIRLowEdgeSet) {
+      frequency_AM = AIRHighEdgeSet;
+      if (edgebeep) EdgeBeeper();
+    }
+    frequency_AIR = frequency_AM;
+    radio.SetFreqAIR(frequency_AIR / 10);
+#endif
   }
   radio.clearRDS(fullsearchrds);
   if (RDSSPYUSB) Serial.print("G:\r\nRESET-------\r\n\r\n");
