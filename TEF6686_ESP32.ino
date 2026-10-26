@@ -4266,6 +4266,12 @@ void TuneUp() {
   unsigned int temp = 0;
   if (stepsize == 0) {
     if (band > BAND_GAP) {
+#ifdef HAS_AIR_BAND
+      if (band == BAND_AIR) {
+        // AIR step sizes are selected independently of the MW/SW frequency ranges.
+        temp = (airstepsize == 0) ? FREQ_AIR_STEP_25K : 8;
+      } else
+#endif
       if (frequency_AM <= MWHighEdgeSet && frequency_AM >= MWLowEdgeSet) {
         if (!mwstepsize) {
           temp = FREQ_MW_STEP_9K;
@@ -4281,13 +4287,6 @@ void TuneUp() {
         temp = FREQ_SW_STEP_5K;
         frequency_AM = (frequency_AM / FREQ_SW_STEP_5K) * FREQ_SW_STEP_5K;
       }
-#ifdef HAS_AIR_BAND
-      else if (frequency_AM < AIRHighEdgeSet && frequency_AM > AIRLowEdgeSet) {
-
-        if (airstepsize == 0) temp = FREQ_AIR_STEP_25K;
-        else temp = FREQ_AIR_STEP_8K33;
-      }
-#endif
     } else {
       if (band == BAND_OIRT) {
         temp = FREQ_OIRT_STEP_30K;
@@ -4382,6 +4381,12 @@ void TuneDown() {
   unsigned int temp = 0;
   if (stepsize == 0) {
     if (band > BAND_GAP) {
+#ifdef HAS_AIR_BAND
+      if (band == BAND_AIR) {
+        // AIR step sizes are selected independently of the MW/SW frequency ranges.
+        temp = (airstepsize == 0) ? FREQ_AIR_STEP_25K : 8;
+      } else
+#endif
       if (frequency_AM < MWHighEdgeSet && frequency_AM > MWLowEdgeSet) {
         if (!mwstepsize) {
           temp = FREQ_MW_STEP_9K;
@@ -4393,10 +4398,6 @@ void TuneDown() {
       } else if (frequency_AM < MWLowEdgeSet) {
         temp = FREQ_MW_STEP_9K;
         frequency_AM = (frequency_AM / FREQ_MW_STEP_9K) * FREQ_MW_STEP_9K;
-#ifdef HAS_AIR_BAND
-      } else if (band == BAND_AIR) {
-        temp = (airstepsize == 0) ? FREQ_AIR_STEP_25K : 8;
-#endif
       } else {
         temp = FREQ_SW_STEP_5K;
         frequency_AM = (frequency_AM / FREQ_SW_STEP_5K) * FREQ_SW_STEP_5K;
