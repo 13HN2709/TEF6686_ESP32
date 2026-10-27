@@ -2,9 +2,6 @@ name: Build TEF6686 ESP32
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - dev/frequency-range-audit-air
 
 permissions:
   contents: read
