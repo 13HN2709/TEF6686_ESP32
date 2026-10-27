@@ -532,6 +532,13 @@ void setup() {
   softmutefm = EEPROM.readByte(EE_BYTE_SOFTMUTEFM);
   frequency_AM = EEPROM.readUInt(EE_UINT16_FREQUENCY_AM);
   language = EEPROM.readByte(EE_BYTE_LANGUAGE);
+  // Compact language table: English, German and Simplified Chinese.
+  // Keep language settings from older firmware versions compatible.
+  if (language == 6) language = 1;       // legacy German
+  else if (language == 14) language = 2; // legacy Simplified Chinese
+  else if (language > 2) language = 0;   // unsupported language -> English
+  EEPROM.writeByte(EE_BYTE_LANGUAGE, language);
+  EEPROM.commit();
   showrdserrors = EEPROM.readByte(EE_BYTE_SHOWRDSERRORS);
   TEF = EEPROM.readByte(EE_BYTE_TEF);
   displayflip = EEPROM.readByte(EE_BYTE_DISPLAYFLIP);
