@@ -1,4 +1,4 @@
-#define HAS_AIR_BAND
+// #define HAS_AIR_BAND  // temporarily disabled for firmware-size test
 
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
