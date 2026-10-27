@@ -37,7 +37,7 @@
 #define XTAL_2V_ADC                 2250
 #define XTAL_ADC_TOL                300
 
-#define LANGUAGE_CHS                14
+#define LANGUAGE_CHS                2
 
 #define FREQ_MW_STEP_9K             9
 #define FREQ_MW_STEP_10K            10
