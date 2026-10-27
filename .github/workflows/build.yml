@@ -1,4 +1,4 @@
-name: Build TEF6686 ESP32
+name: Build Firmware
 
 on:
   workflow_dispatch:
