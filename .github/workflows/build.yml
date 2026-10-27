@@ -1,32 +1,6 @@
 name: Build TEF6686 ESP32
 
 on:
-workflow_dispatch:
-
-permissions:
-contents: read
-
-jobs:
-build:
-name: PlatformIO ESP32 compile check
-runs-on: ubuntu-latest
-timeout-minutes: 20
-steps:
-- name: Check out source
-uses: actions/checkout@v4
-
-- name: Set up Python  
-    uses: actions/setup-python@v5  
-    with:  
-      python-version: "3.x"  
-
-  - name: Install PlatformIO  
-    run: python -m pip install --upgrade platformio  
-
-  - name: Compile firmware (no upload)  
-    run: pio run -e esp32
-
-on:
   workflow_dispatch:
 
 permissions:
@@ -34,7 +8,7 @@ permissions:
 
 jobs:
   build:
-    name: PlatformIO ESP32 compile check
+    name: Build firmware and package flash files
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -49,5 +23,39 @@ jobs:
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
 
-      - name: Compile firmware (no upload)
+      - name: Compile firmware
         run: pio run -e esp32
+
+      - name: Create full-flash image
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUILD_DIR=".pio/build/esp32"
+          BOOT_APP0="$HOME/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin"
+          ESPTOOL="$HOME/.platformio/packages/tool-esptoolpy/esptool.py"
+
+          test -f "$BUILD_DIR/firmware.bin"
+          test -f "$BUILD_DIR/bootloader.bin"
+          test -f "$BUILD_DIR/partitions.bin"
+          test -f "$BOOT_APP0"
+          test -f "$ESPTOOL"
+
+          python "$ESPTOOL" --chip esp32 merge_bin \
+            -o "$BUILD_DIR/TEF6686_ESP32-full-flash.bin" \
+            --flash_mode qio --flash_freq 80m --flash_size 4MB \
+            0x1000 "$BUILD_DIR/bootloader.bin" \
+            0x8000 "$BUILD_DIR/partitions.bin" \
+            0xe000 "$BOOT_APP0" \
+            0x10000 "$BUILD_DIR/firmware.bin"
+
+          cp "$BUILD_DIR/firmware.bin" "$BUILD_DIR/TEF6686_ESP32-firmware-only.bin"
+
+      - name: Upload firmware files
+        uses: actions/upload-artifact@v4
+        with:
+          name: TEF6686-ESP32-firmware
+          path: |
+            .pio/build/esp32/TEF6686_ESP32-full-flash.bin
+            .pio/build/esp32/TEF6686_ESP32-firmware-only.bin
+          if-no-files-found: error
+          retention-days: 14
