@@ -48,7 +48,7 @@ using fs::FS;
 #define EXT_IRQ         14
 
 #define DYNAMIC_SPI_SPEED   // uncomment to enable dynamic SPI Speed https://github.com/ohmytime/TFT_eSPI_DynamicSpeed
-#define HAS_AIR_BAND         // enable Air Band (software support)
+// #define HAS_AIR_BAND         // enable Air Band (software support)
 
 #ifdef ARS
 TFT_eSPI tft = TFT_eSPI(320, 240);
